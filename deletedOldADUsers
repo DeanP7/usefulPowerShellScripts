@@ -1,0 +1,31 @@
+# Define the path to the Disabled Users Organizational Unit (OU)
+$disabledUsersOU = "OU=DISABLED USERS,DC=medlinkmanagement,DC=com"
+
+# Define the number of days for which a user hasn't logged in
+$inactiveDays = 365
+
+# Define the path where you want to save the CSV file
+$csvFilePath = "\\lbh-fileserv\lbhshares\it\ADlogs\deletedADUsers.csv"
+
+# Import the Active Directory module if not already loaded
+if (-not (Get-Module -Name ActiveDirectory)) {
+    Import-Module ActiveDirectory
+}
+
+# Get the current date
+$currentDate = Get-Date -Format "yyyy-MM-dd"
+
+# Get inactive users from the specified OU
+$inactiveUsers = Search-ADAccount -AccountInactive -UsersOnly -SearchBase $disabledUsersOU -TimeSpan ([TimeSpan]::FromDays($inactiveDays))
+
+# Export the list of inactive users to a CSV file
+$inactiveUsers | Select-Object Name, DistinguishedName, LastLogonDate | ConvertTo-Csv -NoTypeInformation | ForEach-Object {
+    $_ + ",$currentDate"
+} | Out-File -Append -FilePath $csvFilePath
+
+# Delete the inactive users from Active Directory
+#$inactiveUsers | ForEach-Object {
+#    Remove-ADObject -Identity $_.ObjectGUID -Confirm:$false
+#}
+
+Write-Host "Inactive users have been exported to $csvFilePath and deleted from Active Directory."
