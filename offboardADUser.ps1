@@ -1,4 +1,6 @@
-Import-Module ActiveDirectory
+if (-not (Get-Module -Name ActiveDirectory)) {
+    Import-Module ActiveDirectory
+}
 
 Write-Host "Active Directory offboarding script"
 
