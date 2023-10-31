@@ -1,16 +1,13 @@
 # Specify the path to the folder containing user accounts
-$userFolderPath = "\\W-LBH-wow13\c$\Users"
+$userFolderPath = ""
 
 # Specify an array of folder names to ignore
-$foldersToIgnore = @("LBAdmin", "Public", "Default")
+$foldersToIgnore = @("Public", "Default")
 
 # Specify an array of distinguished names for the target OUs in Active Directory
 $ouDNs = @(
-    "OU=DOMAIN ADMINISTRATORS,OU=LBH USERS,DC=medlinkmanagement,DC=com",
-    "OU=DOMAIN USERS,OU=LBH USERS,DC=medlinkmanagement,DC=com",
-    "OU=HOSPITAL ADMINISTRATORS,OU=LBH USERS,DC=medlinkmanagement,DC=com",
-    "OU=Service Accounts,OU=LBH USERS,DC=medlinkmanagement,DC=com",
-    "OU=Test Users,OU=LBH USERS,DC=medlinkmanagement,DC=com"
+    "OU=OU,DC=domain,DC=com",
+    "OU=OU,DC=domain,DC=com",
 )
 
 # Get all folder names in the C:\Users directory
