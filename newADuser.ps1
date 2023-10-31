@@ -4,7 +4,7 @@ $newUserLastName = Read-Host "Enter new user's last name"
 $newUsername = Read-Host "Enter new user's username"
 $newUserJob = Read-Host "Enter new user's job description"
 $newUserEmail = Read-Host "Enter new user's email"
-$ou = "OU=DOMAIN USERS,OU=LBH USERS,DC=medlinkmanagement,DC=com"
+$ou = "OU=OU,DC=domain,DC=com"
 
 # Prompt for new user password
 do {
@@ -23,8 +23,8 @@ New-ADUser -Name "$newUserFirstName $newUserLastName" `
     -GivenName $newUserFirstName `
     -Surname $newUserLastName `
     -SamAccountName $newUsername `
-    -UserPrincipalName "$newUsername@lakebutlerhospital.com" `
-    -EmailAddress "$newUserEmail@lakebutlerhospital.com" `
+    -UserPrincipalName "$newUsername@domain.com" `
+    -EmailAddress "$newUserEmail@domain.com" `
     -Description $newUserJob `
     -Path $ou `
     -Enabled $true `
