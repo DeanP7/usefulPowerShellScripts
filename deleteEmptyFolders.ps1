@@ -1,4 +1,5 @@
 #Created this script to help clean up our on-prem file server
+#It looks for empty directories older than a set threshold and deletes them.
 
 # Set a directory to look through, an output CSV path, the day threshold, and any excluded directories.
 $rootFolderPath = ""
