@@ -1,3 +1,5 @@
+#Created this script to help clean up our on-prem file server
+
 # Set a directory to look through, an output CSV path, the day threshold, and any excluded directories.
 $rootFolderPath = ""
 $csvFilePath = ""
