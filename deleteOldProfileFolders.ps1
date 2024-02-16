@@ -1,4 +1,5 @@
 #Old user profiles were using up a large amount of drive space on shared computers, this script helps clean them up.
+#Script collect names of user directories and compares them to users in specified OUs. Deletes directories where there is no match
 
 
 # Specify the path to the folder containing user accounts, usually something like "C:\Users"
