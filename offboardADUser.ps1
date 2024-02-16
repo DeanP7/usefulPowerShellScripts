@@ -1,17 +1,24 @@
-if (-not (Get-Module -Name ActiveDirectory)) {
-    Import-Module ActiveDirectory
-}
+#Script for termed employees.
+#Prompts user for termed employee name and compares it to AD users.
+#Once confirmed, it disables the user, scrambles their password, moves them to "DISABLED USER" OU, and logs this to a csv file
+
+Import-Module ActiveDirectory
+
+#-ResourceContext server should be changed to domain (i.e. "theCorporation.com")
+$resourceContextServer = ""
 
 Write-Host "Active Directory offboarding script"
 
 $terminatedUserInput = Read-Host "Enter the name of the terminated employee you would like to disable in Active Directory"
-
 $adCompare = Get-ADUser -Filter "Name -like '*$terminatedUserInput*'"
 
 if ($adCompare.Count -eq 0) {
     Write-Host "No users were matched with your input"
 } else {
     Write-Host "Here is a list of matched users based on your input"
+
+    # Ensure $adCompare is always treated as an array
+    $adCompare = @($adCompare)
 
     #path to .csv log
     $csvPath = ""
@@ -23,7 +30,8 @@ if ($adCompare.Count -eq 0) {
 
     for ($i = 0; $i -lt $adCompare.Count; $i++) {
         $user = $adCompare[$i]
-        $groups = Get-ADPrincipalGroupMembership -Identity $user
+        #-ResourceContext server should be changed to domain (i.e. "theCorporation.com")
+        $groups = Get-ADPrincipalGroupMembership -ResourceContextServer $resourceContextServer -Identity $user
 
         Write-Host "$i. $($adCompare[$i].Name), $($adCompare[$i].SamAccountName)"
         Write-Host "   Member of Groups:"
