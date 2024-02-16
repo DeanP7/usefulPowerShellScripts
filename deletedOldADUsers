@@ -1,14 +1,14 @@
 #Active Directory domain was collecting a large amount of users, who had long left the company.
 #Deletes account older than a certain threshold, logs all deleted account and their group membership to a .csv
 
-# Define the path to the Disabled Users Organizational Unit (OU)
-$disabledUsersOU = "OU=DISABLED USERS,DC=medlinkmanagement,DC=com"
+# Define the path to the Disabled Users Organizational Unit (i.e. "OU=DISABLED USERS,DC=theCorporation,DC=com"
+$disabledUsersOU = "OU=ou,DC=domain,DC=com"
 
 # Define the number of days for which a user hasn't logged in
 $inactiveDays = 365
 
 # Define the path where you want to save the CSV file
-$csvFilePath = "\\lbh-fileserv\lbhshares\it\ADlogs\deletedADUsers.csv"
+$csvFilePath = "pathToCsv\output.csv"
 
 # Import the Active Directory module if not already loaded
 if (-not (Get-Module -Name ActiveDirectory)) {
