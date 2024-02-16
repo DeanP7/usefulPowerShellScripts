@@ -1,7 +1,10 @@
-# Specify the path to the folder containing user accounts
+#Old user profiles were using up a large amount of drive space on shared computers, this script helps clean them up.
+
+
+# Specify the path to the folder containing user accounts, usually something like "C:\Users"
 $userFolderPath = ""
 
-# Specify an array of folder names to ignore
+# Array of folder names to ignore
 $foldersToIgnore = @("Public", "Default")
 
 # Specify an array of distinguished names for the target OUs in Active Directory
@@ -10,7 +13,7 @@ $ouDNs = @(
     "OU=OU,DC=domain,DC=com",
 )
 
-# Get all folder names in the C:\Users directory
+# Get all folder names in the $userFolderPath directory
 $folderNames = Get-ChildItem $userFolderPath -Directory | Select-Object -ExpandProperty Name
 
 # Initialize an array to collect folders without matching usernames (without domain)
