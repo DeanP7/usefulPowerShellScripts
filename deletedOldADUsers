@@ -1,3 +1,6 @@
+#Active Directory domain was collecting a large amount of users, who had long left the company.
+#Deletes account older than a certain threshold, logs all deleted account and their group membership to a .csv
+
 # Define the path to the Disabled Users Organizational Unit (OU)
 $disabledUsersOU = "OU=DISABLED USERS,DC=medlinkmanagement,DC=com"
 
