@@ -10,10 +10,7 @@ $inactiveDays = 365
 # Define the path where you want to save the CSV file
 $csvFilePath = "pathToCsv\output.csv"
 
-# Import the Active Directory module if not already loaded
-if (-not (Get-Module -Name ActiveDirectory)) {
-    Import-Module ActiveDirectory
-}
+Import-Module ActiveDirectory
 
 # Get the current date
 $currentDate = Get-Date -Format "yyyy-MM-dd"
@@ -31,4 +28,4 @@ $inactiveUsers | Select-Object Name, DistinguishedName, LastLogonDate | ConvertT
 #    Remove-ADObject -Identity $_.ObjectGUID -Confirm:$false
 #}
 
-Write-Host "Inactive users have been exported to $csvFilePath and deleted from Active Directory."
+Write-Host "Deleted accounts have been logged to $csvFilePath."
