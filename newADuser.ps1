@@ -1,9 +1,13 @@
 #Script for adding new employees to Active Directory domain.
 #Prompts user for new user's information, new password, and a reference employee to mirror their groups.
 
+Import-Module ActiveDirectory
 
-#Enter the OU path you want the new user to reside in. Example: "OU=DOMAIN USERS,DC=theCorporation,DC=com"
+# Customizable variables
 $ou = "OU=,DC=,DC=com"
+$resourceContextServer = "yourdomain.com"
+
+Write-Host "Active Directory new employee creation script"
 
 # Prompt the user for new user information
 $newUserFirstName = Read-Host "Enter new user's first name"
@@ -12,7 +16,6 @@ $newUserId = Read-Host "Enter new user's employee ID#"
 $newUserJob = Read-Host "Enter new user's job description"
 $newUsername = $newUserFirstName.substring(0,1)+$newUserLastName.substring(0,1)+$newUserId
 $newUserEmail = $newUserFirstName.substring(0,1)+$newUserLastName
-
 
 # Prompt for new user password
 do {
@@ -32,8 +35,8 @@ New-ADUser -Name "$newUserFirstName $newUserLastName" `
     -GivenName $newUserFirstName `
     -Surname $newUserLastName `
     -SamAccountName $newUsername `
-    -UserPrincipalName "$newUsername@lakebutlerhospital.com" `
-    -EmailAddress "$newUserEmail@lakebutlerhospital.com" `
+    -UserPrincipalName "$newUsername@yourdomain.com" `
+    -EmailAddress "$newUserEmail@yourdomain.com" `
     -Description $newUserJob `
     -Path $ou `
     -Enabled $true `
@@ -44,7 +47,7 @@ New-ADUser -Name "$newUserFirstName $newUserLastName" `
 $existingUserInput = Read-Host "Enter the name of the existing user to reference"
 
 # Get matching users based on input
-$adCompare = Get-ADUser -Filter "Name -like '*$existingUserInput*'"
+$adCompare = Get-ADUser -Filter "Name -like '*$existingUserInput*'" -Server $resourceContextServer
 
 if ($adCompare.Count -eq 0) {
     Write-Host "No users were matched with your input."
@@ -59,7 +62,7 @@ $adCompare = @($adCompare)
 
 for ($i = 0; $i -lt $adCompare.Count; $i++) {
     $user = $adCompare[$i]
-    $groups = Get-ADPrincipalGroupMembership -ResourceContextServer medlinkmanagement.com -Identity $user
+    $groups = Get-ADPrincipalGroupMembership -ResourceContextServer $resourceContextServer -Identity $user
 
     Write-Host "$i. $($adCompare[$i].Name), $($adCompare[$i].SamAccountName)"
     Write-Host "   Member of Groups:"
@@ -68,7 +71,6 @@ for ($i = 0; $i -lt $adCompare.Count; $i++) {
     }
 }
 
-
 $indexInput = Read-Host "Enter the number of the user you want to reference"
 
 if ($indexInput -ge 0 -and $indexInput -lt $adCompare.Count) {
@@ -76,7 +78,7 @@ if ($indexInput -ge 0 -and $indexInput -lt $adCompare.Count) {
     Write-Host "You have selected $($existingUser.Name), $($existingUser.SamAccountName)"
 
     # Get the groups of the existing user
-    $existingUserGroups = Get-ADPrincipalGroupMembership -Identity $existingUser
+    $existingUserGroups = Get-ADPrincipalGroupMembership -Identity $existingUser -Server $resourceContextServer
 
     # Create an array to hold group objects
     $groupObjects = @()
@@ -90,7 +92,7 @@ if ($indexInput -ge 0 -and $indexInput -lt $adCompare.Count) {
 
     # Add the new user to the same groups as the existing user (excluding specified groups)
     foreach ($groupObject in $groupObjects) {
-        Add-ADPrincipalGroupMembership -Identity $newUsername -MemberOf $groupObject
+        Add-ADPrincipalGroupMembership -Identity $newUsername -MemberOf $groupObject -Server $resourceContextServer
     }
 
     # Output success message
