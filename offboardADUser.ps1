@@ -4,13 +4,16 @@
 
 Import-Module ActiveDirectory
 
-#-ResourceContext server should be changed to domain (i.e. "theCorporation.com")
-$resourceContextServer = ""
+$csvPath = "\\your-file-server\share\disabledUsersLog.csv"
+$disabledOU = "OU=DISABLED USERS,DC=yourdomain,DC=com"
+$resourceContextServer = "yourdomain.com"
+$domainController = "YourDomainControllerName.yourdomain.com"
 
 Write-Host "Active Directory offboarding script"
 
 $terminatedUserInput = Read-Host "Enter the name of the terminated employee you would like to disable in Active Directory"
-$adCompare = Get-ADUser -Filter "Name -like '*$terminatedUserInput*'"
+
+$adCompare = Get-ADUser -Filter "Name -like '*$terminatedUserInput*'" -Server $domainController
 
 if ($adCompare.Count -eq 0) {
     Write-Host "No users were matched with your input"
@@ -20,17 +23,13 @@ if ($adCompare.Count -eq 0) {
     # Ensure $adCompare is always treated as an array
     $adCompare = @($adCompare)
 
-    #path to .csv log
-    $csvPath = ""
-
-    #if the .csv doesnt exist, make it
+    # If the .csv doesn't exist, create it
     if (-not (Test-Path $csvPath)) {
         "Name,SamAccountName,DateDisabled" | Out-File -FilePath $csvPath
     }
 
     for ($i = 0; $i -lt $adCompare.Count; $i++) {
         $user = $adCompare[$i]
-        #-ResourceContext server should be changed to domain (i.e. "theCorporation.com")
         $groups = Get-ADPrincipalGroupMembership -ResourceContextServer $resourceContextServer -Identity $user
 
         Write-Host "$i. $($adCompare[$i].Name), $($adCompare[$i].SamAccountName)"
@@ -54,24 +53,22 @@ if ($adCompare.Count -eq 0) {
             $randomPassword = New-Guid
 
             # Set the random password for the user
-            Set-ADAccountPassword -Identity $terminatedUser -NewPassword (ConvertTo-SecureString -AsPlainText $randomPassword -Force)
-            Set-ADUser -Identity $terminatedUser -ChangePasswordAtLogon $true
-            Set-ADUser -Identity $terminatedUser -PasswordNeverExpires $false
+            Set-ADAccountPassword -Identity $terminatedUser -NewPassword (ConvertTo-SecureString -AsPlainText $randomPassword -Force) -Server $domainController
+            Set-ADUser -Identity $terminatedUser -ChangePasswordAtLogon $true -Server $domainController
+            Set-ADUser -Identity $terminatedUser -PasswordNeverExpires $false -Server $domainController
 
-            Disable-ADAccount -Identity $terminatedUser
+            Disable-ADAccount -Identity $terminatedUser -Server $domainController
 
-            #log the date of the user being disabled into csv
+            # Log the date of the user being disabled into csv
             $dateDisabled = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
             $logEntry = "$($terminatedUser.Name), $($terminatedUser.SamAccountName), $dateDisabled"
             $logEntry | Out-File -Append -FilePath $csvPath
 
-            Get-ADUser -Identity $terminatedUser -Properties MemberOf | ForEach-Object {
-                $_.MemberOf | Remove-ADGroupMember -Members $_.DistinguishedName -Confirm:$false
+            Get-ADUser -Identity $terminatedUser -Properties MemberOf -Server $domainController | ForEach-Object {
+                $_.MemberOf | Remove-ADGroupMember -Members $_.DistinguishedName -Confirm:$false -Server $domainController
             }
 
-            $disabledOU = "OU=DISABLED USERS,DC=medlinkmanagement,DC=com"
-
-            Move-ADObject -Identity $terminatedUser.DistinguishedName -TargetPath $disabledOU
+            Move-ADObject -Identity $terminatedUser.DistinguishedName -TargetPath $disabledOU -Server $domainController
 
             Write-Host "User $($terminatedUser.Name) has been moved to the 'DISABLED USERS' OU, account has been disabled, and the date of disablement has been recorded in the log."
         } else {
